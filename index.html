@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Horas Acumuladas</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -97,7 +96,6 @@
         const searchButton = document.getElementById('searchButton');
         const resultDiv = document.getElementById('result');
 
-        // Função para buscar os dados do Google Apps Script
         async function fetchStudentHours() {
             resultDiv.textContent = 'Carregando dados...';
             resultDiv.className = 'rounded-lg p-3 loading';
@@ -107,7 +105,8 @@
                     throw new Error(`Erro HTTP: ${response.status}`);
                 }
                 const data = await response.json();
-                return data; // Retorna o objeto de horas {RA: horas}
+
+                return data;
             } catch (error) {
                 console.error('Erro ao buscar dados:', error);
                 resultDiv.textContent = 'Erro ao carregar os dados. Tente novamente mais tarde.';
@@ -116,20 +115,18 @@
             }
         }
 
-
-        let studentHoursData = null;
-
+        let studentData = null;
 
         window.addEventListener('load', async () => {
-            studentHoursData = await fetchStudentHours();
-            if (studentHoursData) {
+            studentData = await fetchStudentHours();
+            if (studentData) {
                 resultDiv.textContent = 'Dados carregados. Digite um RA para consultar.';
                 resultDiv.className = 'rounded-lg p-3';
             }
         });
 
         searchButton.addEventListener('click', () => {
-            if (!studentHoursData) {
+            if (!studentData) {
                 resultDiv.textContent = 'Dados ainda não carregados. Por favor, aguarde.';
                 resultDiv.className = 'rounded-lg p-3 loading';
                 return;
@@ -142,9 +139,13 @@
                 return;
             }
 
-            if (studentHoursData.hasOwnProperty(ra)) {
-                const hours = studentHoursData[ra];
-                resultDiv.textContent = `RA: ${ra} - Horas Acumuladas: ${hours} horas`;
+
+            const studentInfo = studentData[ra]; 
+
+            if (studentInfo) { 
+                const name = studentInfo.name;
+                const hours = studentInfo.hours;
+                resultDiv.textContent = `Olá ${name}, você tem ${hours} horas acumuladas.`;
                 resultDiv.className = 'rounded-lg p-3 success';
             } else {
                 resultDiv.textContent = `RA "${ra}" não encontrado. Verifique o número digitado.`;
