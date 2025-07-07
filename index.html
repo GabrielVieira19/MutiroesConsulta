@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Horas Acumuladas</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -63,7 +64,7 @@
             font-size: 18px;
             font-weight: 500;
             color: #374151;
-            min-height: 24px; 
+            min-height: 24px;
         }
         .error {
             color: #dc2626;
@@ -85,7 +86,6 @@
         <button id="searchButton" class="rounded-lg">Consultar Horas</button>
 
         <div id="result" class="rounded-lg p-3">
-
         </div>
     </div>
 
@@ -95,6 +95,7 @@
         const raInput = document.getElementById('raInput');
         const searchButton = document.getElementById('searchButton');
         const resultDiv = document.getElementById('result');
+
 
         async function fetchStudentHours() {
             resultDiv.textContent = 'Carregando dados...';
@@ -115,18 +116,18 @@
             }
         }
 
-        let studentData = null;
+        let studentHoursData = null; 
 
         window.addEventListener('load', async () => {
-            studentData = await fetchStudentHours();
-            if (studentData) {
+            studentHoursData = await fetchStudentHours();
+            if (studentHoursData) {
                 resultDiv.textContent = 'Dados carregados. Digite um RA para consultar.';
                 resultDiv.className = 'rounded-lg p-3';
             }
         });
 
         searchButton.addEventListener('click', () => {
-            if (!studentData) {
+            if (!studentHoursData) {
                 resultDiv.textContent = 'Dados ainda não carregados. Por favor, aguarde.';
                 resultDiv.className = 'rounded-lg p-3 loading';
                 return;
@@ -140,18 +141,17 @@
             }
 
 
-            const studentInfo = studentData[ra]; 
+            const hours = studentHoursData[ra]; 
 
-            if (studentInfo) { 
-                const name = studentInfo.name;
-                const hours = studentInfo.hours;
-                resultDiv.textContent = `Olá ${name}, você tem ${hours} horas acumuladas.`;
+            if (hours !== undefined) { 
+                resultDiv.textContent = `RA: ${ra} - Horas Acumuladas: ${hours} horas.`;
                 resultDiv.className = 'rounded-lg p-3 success';
             } else {
                 resultDiv.textContent = `RA "${ra}" não encontrado. Verifique o número digitado.`;
                 resultDiv.className = 'rounded-lg p-3 error';
             }
         });
+
 
         raInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
