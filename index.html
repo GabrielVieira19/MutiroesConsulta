@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Horas Acumuladas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+        }
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #result {
+            margin-top: 25px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #374151;
+            min-height: 24px; /* To prevent layout shift */
+        }
+        .error {
+            color: #dc2626;
+        }
+        .success {
+            color: #16a34a;
+        }
+        .loading {
+            color: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Consulta de Horas Acumuladas</h1>
+        <p class="text-gray-600 mb-6">Digite seu RA para ver suas horas acumuladas.</p>
+
+        <input type="text" id="raInput" placeholder="Ex: 123456789" class="rounded-lg focus:ring-blue-500 focus:border-blue-500">
+        <button id="searchButton" class="rounded-lg">Consultar Horas</button>
+
+        <div id="result" class="rounded-lg p-3">
+            <!-- O resultado será exibido aqui -->
+        </div>
+    </div>
+
+    <script>
+        // *** IMPORTANTE ***
+        // Substitua esta URL pela URL de implantação do seu Google Apps Script.
+        // Siga as instruções abaixo para configurar e implantar seu script.
+        const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzBYa7-BFPiJQLsBBrmxcwUkxxMHXmHwF49W4i7JF8MJi2plvUBj21JgcHSj7I-loDb/exec';
+
+        const raInput = document.getElementById('raInput');
+        const searchButton = document.getElementById('searchButton');
+        const resultDiv = document.getElementById('result');
+
+        // Função para buscar os dados do Google Apps Script
+        async function fetchStudentHours() {
+            resultDiv.textContent = 'Carregando dados...';
+            resultDiv.className = 'rounded-lg p-3 loading';
+            try {
+                const response = await fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+                return data; // Retorna o objeto de horas {RA: horas}
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                resultDiv.textContent = 'Erro ao carregar os dados. Tente novamente mais tarde.';
+                resultDiv.className = 'rounded-lg p-3 error';
+                return null;
+            }
+        }
+
+        // Variável para armazenar os dados após o carregamento inicial
+        let studentHoursData = null;
+
+        // Carregar os dados quando a página for carregada
+        window.addEventListener('load', async () => {
+            studentHoursData = await fetchStudentHours();
+            if (studentHoursData) {
+                resultDiv.textContent = 'Dados carregados. Digite um RA para consultar.';
+                resultDiv.className = 'rounded-lg p-3';
+            }
+        });
+
+        searchButton.addEventListener('click', () => {
+            if (!studentHoursData) {
+                resultDiv.textContent = 'Dados ainda não carregados. Por favor, aguarde.';
+                resultDiv.className = 'rounded-lg p-3 loading';
+                return;
+            }
+
+            const ra = raInput.value.trim(); // Remove espaços em branco
+            if (ra === '') {
+                resultDiv.textContent = 'Por favor, digite um RA.';
+                resultDiv.className = 'rounded-lg p-3 error';
+                return;
+            }
+
+            if (studentHoursData.hasOwnProperty(ra)) {
+                const hours = studentHoursData[ra];
+                resultDiv.textContent = `RA: ${ra} - Horas Acumuladas: ${hours} horas`;
+                resultDiv.className = 'rounded-lg p-3 success';
+            } else {
+                resultDiv.textContent = `RA "${ra}" não encontrado. Verifique o número digitado.`;
+                resultDiv.className = 'rounded-lg p-3 error';
+            }
+        });
+
+        // Opcional: Permitir buscar ao pressionar Enter no campo de input
+        raInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
