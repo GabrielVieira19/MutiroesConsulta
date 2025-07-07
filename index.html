@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Horas Acumuladas</title>
-    <!-- Tailwind CSS CDN -->
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -64,7 +64,7 @@
             font-size: 18px;
             font-weight: 500;
             color: #374151;
-            min-height: 24px; /* To prevent layout shift */
+            min-height: 24px; 
         }
         .error {
             color: #dc2626;
@@ -86,14 +86,11 @@
         <button id="searchButton" class="rounded-lg">Consultar Horas</button>
 
         <div id="result" class="rounded-lg p-3">
-            <!-- O resultado será exibido aqui -->
+
         </div>
     </div>
 
     <script>
-        // *** IMPORTANTE ***
-        // Substitua esta URL pela URL de implantação do seu Google Apps Script.
-        // Siga as instruções abaixo para configurar e implantar seu script.
         const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzBYa7-BFPiJQLsBBrmxcwUkxxMHXmHwF49W4i7JF8MJi2plvUBj21JgcHSj7I-loDb/exec';
 
         const raInput = document.getElementById('raInput');
@@ -119,10 +116,10 @@
             }
         }
 
-        // Variável para armazenar os dados após o carregamento inicial
+
         let studentHoursData = null;
 
-        // Carregar os dados quando a página for carregada
+
         window.addEventListener('load', async () => {
             studentHoursData = await fetchStudentHours();
             if (studentHoursData) {
@@ -138,7 +135,7 @@
                 return;
             }
 
-            const ra = raInput.value.trim(); // Remove espaços em branco
+            const ra = raInput.value.trim(); 
             if (ra === '') {
                 resultDiv.textContent = 'Por favor, digite um RA.';
                 resultDiv.className = 'rounded-lg p-3 error';
@@ -155,7 +152,6 @@
             }
         });
 
-        // Opcional: Permitir buscar ao pressionar Enter no campo de input
         raInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
                 searchButton.click();
