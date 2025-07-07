@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Horas Acumuladas</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -89,7 +90,7 @@
     </div>
 
     <script>
-        const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI';
+        const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzBYa7-BFPiJQLsBBrmxcwUkxxMHXmHwF49W4i7JF8MJi2plvUBj21JgcHSj7I-loDb/exec';
 
         const raInput = document.getElementById('raInput');
         const searchButton = document.getElementById('searchButton');
@@ -115,9 +116,9 @@
             }
         }
 
+        let studentHoursData = null;
 
-        let studentHoursData = null; 
-
+        // Carregar os dados quando a página for carregada
         window.addEventListener('load', async () => {
             studentHoursData = await fetchStudentHours();
             if (studentHoursData) {
@@ -140,17 +141,18 @@
                 return;
             }
 
+            const studentInfo = studentHoursData[ra];
 
-            const hours = studentHoursData[ra]; 
-
-            if (hours !== undefined) { 
+            if (studentInfo && studentInfo.hours !== undefined) { 
+                const hours = studentInfo.hours; 
                 resultDiv.textContent = `RA: ${ra} - Horas Acumuladas: ${hours} horas.`;
                 resultDiv.className = 'rounded-lg p-3 success';
             } else {
-                resultDiv.textContent = `RA "${ra}" não encontrado. Verifique o número digitado.`;
+                resultDiv.textContent = `RA "${ra}" não encontrado ou horas não disponíveis. Verifique o número digitado.`;
                 resultDiv.className = 'rounded-lg p-3 error';
             }
         });
+
 
         raInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
