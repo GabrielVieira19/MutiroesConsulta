@@ -20,10 +20,10 @@
     <!-- CAMADA ESCURA -->
     <div class="absolute inset-0 bg-black/40"></div>
 
-    <!-- CONTAINER PRINCIPAL -->
+    <!-- CONTAINER -->
     <div class="relative bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-xl p-6">
 
-        <!-- LOGO + HEADER -->
+        <!-- HEADER -->
         <div class="flex flex-col items-center mb-6">
             <img src="logo.png" alt="Mutirões" class="w-32 mb-2">
             <h1 class="text-2xl font-bold text-gray-800">Mutirões</h1>
@@ -56,14 +56,12 @@ const searchButton = document.getElementById('searchButton');
 const resultDiv = document.getElementById('result');
 const eventsDiv = document.getElementById('eventsList');
 
-let studentHoursData = null;
-
-// Buscar dados do Apps Script
-async function fetchStudentHours() {
-    resultDiv.innerHTML = '<p class="text-blue-600">Carregando dados...</p>';
+// Buscar aluno pelo RA (novo modelo seguro, retornando dados de apenas 1 aluno)
+async function fetchStudentByRA(ra) {
+    resultDiv.innerHTML = '<p class="text-blue-600">Buscando dados...</p>';
 
     try {
-        const response = await fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL);
+        const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?ra=${ra}`);
 
         if (!response.ok) {
             throw new Error(`Erro HTTP: ${response.status}`);
@@ -79,22 +77,8 @@ async function fetchStudentHours() {
     }
 }
 
-// Carrega ao abrir página
-window.addEventListener('load', async () => {
-    studentHoursData = await fetchStudentHours();
-
-    if (studentHoursData) {
-        resultDiv.innerHTML = '<p class="text-gray-500">Digite seu RA para consultar.</p>';
-    }
-});
-
-// Consulta
-searchButton.addEventListener('click', () => {
-
-    if (!studentHoursData) {
-        resultDiv.innerHTML = '<p class="text-blue-600">Aguarde carregamento...</p>';
-        return;
-    }
+// Consulta ao clicar
+searchButton.addEventListener('click', async () => {
 
     const ra = raInput.value.trim();
 
@@ -104,26 +88,26 @@ searchButton.addEventListener('click', () => {
         return;
     }
 
-    const student = studentHoursData.students[ra];
+    const data = await fetchStudentByRA(ra);
 
-    if (!student) {
-        resultDiv.innerHTML = '<p class="text-red-600">RA não encontrado.</p>';
+    if (!data || data.erro) {
+        resultDiv.innerHTML = `<p class="text-red-600">${data?.erro || "Erro na busca."}</p>`;
         eventsDiv.innerHTML = '';
         return;
     }
 
-    // horas totais 
+    const student = data.student;
+    const eventHours = data.eventHours;
+
+    // Horas totais
     resultDiv.innerHTML = `
         <p class="text-2xl font-bold text-green-600">
             ${student.hours} horas acumuladas
         </p>
     `;
 
-    // Eventos 
-    const events = student.events;
-    const eventHours = studentHoursData.eventHours;
-
-    if (!events || events.length === 0) {
+    // Eventos participados
+    if (!student.events || student.events.length === 0) {
         eventsDiv.innerHTML = '<p class="text-gray-500 mt-3">Nenhum evento encontrado.</p>';
         return;
     }
@@ -133,7 +117,7 @@ searchButton.addEventListener('click', () => {
             <h3 class="font-semibold mb-2 text-gray-700">Eventos Participados:</h3>
     `;
 
-    events.forEach(event => {
+    student.events.forEach(event => {
         const hours = eventHours[event] || 0;
 
         html += `
