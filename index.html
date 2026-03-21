@@ -58,7 +58,7 @@ const eventsDiv = document.getElementById('eventsList');
 
 let studentHoursData = null;
 
-// 🔄 Buscar dados do Apps Script
+// Buscar dados do Apps Script
 async function fetchStudentHours() {
     resultDiv.innerHTML = '<p class="text-blue-600">Carregando dados...</p>';
 
@@ -79,7 +79,7 @@ async function fetchStudentHours() {
     }
 }
 
-// 🔄 Carrega ao abrir página
+// Carrega ao abrir página
 window.addEventListener('load', async () => {
     studentHoursData = await fetchStudentHours();
 
@@ -88,7 +88,7 @@ window.addEventListener('load', async () => {
     }
 });
 
-// 🔍 Consulta
+// Consulta
 searchButton.addEventListener('click', () => {
 
     if (!studentHoursData) {
@@ -112,14 +112,14 @@ searchButton.addEventListener('click', () => {
         return;
     }
 
-    // 🎯 HORAS TOTAIS
+    // horas totais 
     resultDiv.innerHTML = `
         <p class="text-2xl font-bold text-green-600">
             ${student.hours} horas acumuladas
         </p>
     `;
 
-    // 📅 EVENTOS
+    // Eventos 
     const events = student.events;
     const eventHours = studentHoursData.eventHours;
 
