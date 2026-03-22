@@ -23,26 +23,59 @@
     <!-- CONTAINER -->
     <div class="relative bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-xl p-6">
 
-        <!-- HEADER -->
-        <div class="flex flex-col items-center mb-6">
-            <img src="mutiroes.png" alt="Mutirões" class="w-32 mb-2">
-            <p class="text-gray-500 text-sm">Consulta de horas acumuladas</p>
+        <!-- MENU -->
+        <div class="flex gap-2 mb-4">
+            <button id="btnConsulta" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                Consulta
+            </button>
+            <button id="btnInfo" class="bg-gray-500 text-white px-4 py-2 rounded-lg">
+                Informações
+            </button>
         </div>
 
-        <!-- INPUT -->
-        <input type="text" id="raInput" placeholder="Digite seu RA"
-            class="w-full p-3 border rounded-xl mb-4 focus:ring-2 focus:ring-blue-400 outline-none">
+        <!-- ABA CONSULTA -->
+        <div id="abaConsulta">
 
-        <button id="searchButton"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-xl font-semibold transition">
-            Consultar
-        </button>
+            <!-- HEADER -->
+            <div class="flex flex-col items-center mb-6">
+                <img src="logo.png" alt="Mutirões" class="w-32 mb-2">
+                <h1 class="text-2xl font-bold text-gray-800">Mutirões</h1>
+                <p class="text-gray-500 text-sm">Consulta de horas acumuladas</p>
+            </div>
 
-        <!-- RESULTADO -->
-        <div id="result" class="mt-6 text-center"></div>
+            <!-- INPUT -->
+            <input type="text" id="raInput" placeholder="Digite seu RA"
+                class="w-full p-3 border rounded-xl mb-4 focus:ring-2 focus:ring-blue-400 outline-none">
 
-        <!-- EVENTOS -->
-        <div id="eventsList" class="mt-4"></div>
+            <button id="searchButton"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-xl font-semibold transition">
+                Consultar
+            </button>
+
+            <!-- RESULTADO -->
+            <div id="result" class="mt-6 text-center"></div>
+
+            <!-- EVENTOS -->
+            <div id="eventsList" class="mt-4"></div>
+
+        </div>
+
+        <!-- ABA INFORMAÇÕES -->
+        <div id="abaInfo" class="hidden">
+
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Informações</h2>
+
+            <p class="text-gray-700 mb-3">
+                Em caso de dúvidas ou problemas com suas horas, entre em contato com a equipe responsável:
+            </p>
+
+            <div class="bg-gray-100 p-4 rounded-lg space-y-2">
+                <p>📧 <strong>Email:</strong> contato@mutiroes.com</p>
+                <p>📱 <strong>WhatsApp:</strong> (19) 99999-9999</p>
+                <p>📍 <strong>Local:</strong> Faculdade / Sala X</p>
+            </div>
+
+        </div>
 
     </div>
 
@@ -55,7 +88,7 @@ const searchButton = document.getElementById('searchButton');
 const resultDiv = document.getElementById('result');
 const eventsDiv = document.getElementById('eventsList');
 
-// Buscar aluno pelo RA (novo modelo seguro, retornando dados de apenas 1 aluno)
+// Buscar aluno pelo RA
 async function fetchStudentByRA(ra) {
     resultDiv.innerHTML = '<p class="text-blue-600">Buscando dados...</p>';
 
@@ -76,7 +109,7 @@ async function fetchStudentByRA(ra) {
     }
 }
 
-// Consulta ao clicar
+// Consulta
 searchButton.addEventListener('click', async () => {
 
     const ra = raInput.value.trim();
@@ -98,14 +131,14 @@ searchButton.addEventListener('click', async () => {
     const student = data.student;
     const eventHours = data.eventHours;
 
-    // Horas totais
+    // HORAS
     resultDiv.innerHTML = `
         <p class="text-2xl font-bold text-green-600">
             ${student.hours} horas acumuladas
         </p>
     `;
 
-    // Eventos participados
+    // EVENTOS PARTICIPADOS
     if (!student.events || student.events.length === 0) {
         eventsDiv.innerHTML = '<p class="text-gray-500 mt-3">Nenhum evento encontrado.</p>';
         return;
@@ -137,6 +170,35 @@ raInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         searchButton.click();
     }
+});
+
+// CONTROLE DAS ABAS
+const btnConsulta = document.getElementById('btnConsulta');
+const btnInfo = document.getElementById('btnInfo');
+
+const abaConsulta = document.getElementById('abaConsulta');
+const abaInfo = document.getElementById('abaInfo');
+
+btnConsulta.addEventListener('click', () => {
+    abaConsulta.classList.remove('hidden');
+    abaInfo.classList.add('hidden');
+
+    btnConsulta.classList.add('bg-blue-500');
+    btnConsulta.classList.remove('bg-gray-500');
+
+    btnInfo.classList.add('bg-gray-500');
+    btnInfo.classList.remove('bg-blue-500');
+});
+
+btnInfo.addEventListener('click', () => {
+    abaConsulta.classList.add('hidden');
+    abaInfo.classList.remove('hidden');
+
+    btnInfo.classList.add('bg-blue-500');
+    btnInfo.classList.remove('bg-gray-500');
+
+    btnConsulta.classList.add('bg-gray-500');
+    btnConsulta.classList.remove('bg-blue-500');
 });
 
 </script>
