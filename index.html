@@ -17,156 +17,188 @@
 <body class="min-h-screen flex items-center justify-center p-6 bg-center bg-no-repeat bg-cover"
       style="background-image: url('logo.png');">
 
-<div class="absolute inset-0 bg-black/40"></div>
+    <!-- CAMADA ESCURA -->
+    <div class="absolute inset-0 bg-black/40"></div>
 
-<div class="relative bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-xl p-6">
+    <!-- CONTAINER -->
+    <div class="relative bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-xl p-6">
 
-    <!-- MENU -->
-    <div class="flex gap-2 mb-4">
-        <button id="btnConsulta" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Consulta</button>
-        <button id="btnInfo" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Informações</button>
-        <button id="btnValidacao" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Validação</button>
-    </div>
-
-    <!-- ABA CONSULTA -->
-    <div id="abaConsulta">
-
-        <div class="flex flex-col items-center mb-6">
-            <img src="logo.png" class="w-32 mb-2">
-            <h1 class="text-2xl font-bold">Mutirões</h1>
+        <!-- MENU -->
+        <div class="flex gap-2 mb-4">
+            <button id="btnConsulta" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                Consulta
+            </button>
+            <button id="btnInfo" class="bg-gray-500 text-white px-4 py-2 rounded-lg">
+                Informações
+            </button>
         </div>
 
-        <input id="raInput" placeholder="Digite seu RA"
-            class="w-full p-3 border rounded-xl mb-4">
+        <!-- ABA CONSULTA -->
+        <div id="abaConsulta">
 
-        <button id="searchButton"
-            class="w-full bg-blue-500 text-white p-3 rounded-xl mb-4">
-            Consultar
-        </button>
+            <!-- HEADER -->
+            <div class="flex flex-col items-center mb-6">
+                <img src="mutiroes.png" alt="Mutirões" class="w-32 mb-2">
+                <p class="text-gray-500 text-sm">Consulta de horas acumuladas</p>
+            </div>
 
-        <div id="result" class="text-center"></div>
-        <div id="eventsList"></div>
+            <!-- INPUT -->
+            <input type="text" id="raInput" placeholder="Digite seu RA"
+                class="w-full p-3 border rounded-xl mb-4 focus:ring-2 focus:ring-blue-400 outline-none">
+
+            <button id="searchButton"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-xl font-semibold transition">
+                Consultar
+            </button>
+
+            <!-- RESULTADO -->
+            <div id="result" class="mt-6 text-center"></div>
+
+            <!-- EVENTOS -->
+            <div id="eventsList" class="mt-4"></div>
+
+        </div>
+
+        <!-- ABA INFORMAÇÕES -->
+        <div id="abaInfo" class="hidden">
+
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Informações</h2>
+
+            <p class="text-gray-700 mb-3">
+                Em caso de dúvidas ou problemas com suas horas, entre em contato com a equipe responsável:
+            </p>
+
+            <div class="bg-gray-100 p-4 rounded-lg space-y-2">
+                <p>📧 <strong>Email:</strong> mutiroes@unicamp.br</p>
+                <p>📱 <strong>WhatsApp:</strong> Brunna - (12) 99141-3321</p>
+                <p>📱 <strong>WhatsApp:</strong> Gabriel - (16) 98172-2100</p>
+            </div>
+
+        </div>
 
     </div>
-
-    <!-- ABA INFORMAÇÕES -->
-    <div id="abaInfo" class="hidden">
-        <h2 class="text-xl font-bold mb-4">Informações</h2>
-        <p>Email: mutiroes@unicamp.br</p>
-        <p>WhatsApp: (19) 99999-9999</p>
-    </div>
-
-    <!-- ABA VALIDAÇÃO -->
-    <div id="abaValidacao" class="hidden">
-
-        <h2 class="text-xl font-bold mb-4">Validação de Créditos</h2>
-
-        <p class="mb-3">Informe as horas para validação</p>
-
-        <input id="raValidacao" placeholder="Digite seu RA"
-            class="w-full p-3 border rounded-xl mb-3">
-
-        <input id="horasValidacao" type="number" placeholder="Horas"
-            class="w-full p-3 border rounded-xl mb-3">
-
-        <button id="btnValidar"
-            class="w-full bg-green-500 text-white p-3 rounded-xl">
-            Validar
-        </button>
-
-        <div id="msgValidacao" class="mt-4 text-center"></div>
-
-    </div>
-
-</div>
 
 <script>
 
-const URL = 'https://script.google.com/macros/s/AKfycbznBys52q43XQnK79b6N6yPlxJWV5AvB0cDT_ifF7T9ddJtZlvaTo48UlOnGtK31nrT/exec';
+const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbznBys52q43XQnK79b6N6yPlxJWV5AvB0cDT_ifF7T9ddJtZlvaTo48UlOnGtK31nrT/exec';
 
-// ELEMENTOS
 const raInput = document.getElementById('raInput');
+const searchButton = document.getElementById('searchButton');
 const resultDiv = document.getElementById('result');
 const eventsDiv = document.getElementById('eventsList');
 
-// 🔍 CONSULTA
-document.getElementById('searchButton').addEventListener('click', async () => {
+// Buscar aluno pelo RA
+async function fetchStudentByRA(ra) {
+    resultDiv.innerHTML = '<p class="text-blue-600">Buscando dados...</p>';
+
+    try {
+        const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?ra=${ra}`);
+
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error(error);
+        resultDiv.innerHTML = '<p class="text-red-600">Erro ao carregar dados.</p>';
+        return null;
+    }
+}
+
+// Consulta
+searchButton.addEventListener('click', async () => {
 
     const ra = raInput.value.trim();
 
-    const res = await fetch(`${URL}?ra=${ra}`);
-    const data = await res.json();
+    if (!ra) {
+        resultDiv.innerHTML = '<p class="text-red-600">Digite um RA válido.</p>';
+        eventsDiv.innerHTML = '';
+        return;
+    }
 
-    if (data.erro) {
-        resultDiv.innerHTML = data.erro;
+    const data = await fetchStudentByRA(ra);
+
+    if (!data || data.erro) {
+        resultDiv.innerHTML = `<p class="text-red-600">${data?.erro || "Erro na busca."}</p>`;
+        eventsDiv.innerHTML = '';
         return;
     }
 
     const student = data.student;
+    const eventHours = data.eventHours;
 
+    // HORAS
     resultDiv.innerHTML = `
-        <p class="text-2xl text-green-600">${student.hours} horas acumuladas</p>
+        <p class="text-2xl font-bold text-green-600">
+            ${student.hours} horas acumuladas
+        </p>
     `;
 
-    // 🔴 HORAS VALIDADAS
-    if (student.status && student.status !== "Sem solicitação") {
-        resultDiv.innerHTML += `
-            <p class="text-red-600">
-                ${student.requestedHours}h - ${student.status}
-            </p>
-        `;
+    // EVENTOS PARTICIPADOS
+    if (!student.events || student.events.length === 0) {
+        eventsDiv.innerHTML = '<p class="text-gray-500 mt-3">Nenhum evento encontrado.</p>';
+        return;
     }
 
-    // EVENTOS
-    let html = "";
-    student.events.forEach(e => {
-        html += `<div>${e}</div>`;
+    let html = `
+        <div class="mt-4">
+            <h3 class="font-semibold mb-2 text-gray-700">Eventos Participados:</h3>
+    `;
+
+    student.events.forEach(event => {
+        const hours = eventHours[event] || 0;
+
+        html += `
+            <div class="bg-gray-100 p-3 rounded-lg mb-2 flex justify-between items-center">
+                <span>${event}</span>
+                <span class="font-bold text-blue-600">${hours}h</span>
+            </div>
+        `;
     });
+
+    html += '</div>';
 
     eventsDiv.innerHTML = html;
-
 });
 
-// 📤 VALIDAÇÃO
-document.getElementById('btnValidar').addEventListener('click', async () => {
-
-    const ra = document.getElementById('raValidacao').value;
-    const horas = document.getElementById('horasValidacao').value;
-
-    const res = await fetch(URL, {
-        method: "POST",
-        body: JSON.stringify({ ra, hours: horas })
-    });
-
-    const data = await res.json();
-
-    document.getElementById('msgValidacao').innerHTML =
-        data.sucesso ? "Solicitação enviada!" : "Erro na solicitação";
-
+// ENTER = buscar
+raInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        searchButton.click();
+    }
 });
 
-// 🔄 ABAS
+// CONTROLE DAS ABAS
+const btnConsulta = document.getElementById('btnConsulta');
+const btnInfo = document.getElementById('btnInfo');
+
 const abaConsulta = document.getElementById('abaConsulta');
 const abaInfo = document.getElementById('abaInfo');
-const abaValidacao = document.getElementById('abaValidacao');
 
-document.getElementById('btnConsulta').onclick = () => {
+btnConsulta.addEventListener('click', () => {
     abaConsulta.classList.remove('hidden');
     abaInfo.classList.add('hidden');
-    abaValidacao.classList.add('hidden');
-};
 
-document.getElementById('btnInfo').onclick = () => {
+    btnConsulta.classList.add('bg-blue-500');
+    btnConsulta.classList.remove('bg-gray-500');
+
+    btnInfo.classList.add('bg-gray-500');
+    btnInfo.classList.remove('bg-blue-500');
+});
+
+btnInfo.addEventListener('click', () => {
     abaConsulta.classList.add('hidden');
     abaInfo.classList.remove('hidden');
-    abaValidacao.classList.add('hidden');
-};
 
-document.getElementById('btnValidacao').onclick = () => {
-    abaConsulta.classList.add('hidden');
-    abaInfo.classList.add('hidden');
-    abaValidacao.classList.remove('hidden');
-};
+    btnInfo.classList.add('bg-blue-500');
+    btnInfo.classList.remove('bg-gray-500');
+
+    btnConsulta.classList.add('bg-gray-500');
+    btnConsulta.classList.remove('bg-blue-500');
+});
 
 </script>
 
