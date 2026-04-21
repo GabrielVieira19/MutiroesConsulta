@@ -113,11 +113,25 @@ document.getElementById('searchButton').onclick = async () => {
 
         let html = "<h3 class='mt-4'>Eventos:</h3>";
 
+        const eventInfo = data.eventInfo;
+
         data.student.events.forEach(e => {
-            html += `<div class="flex justify-between bg-gray-100 p-2 mt-2">
-                        <span>${e}</span>
-                        <span>${data.eventHours[e] || 0}h</span>
-                    </div>`;
+        
+            const info = eventInfo[e] || {};
+            const horas = info.horas || 0;
+            const dataEvento = info.data || "Sem data";
+        
+            html += `
+                <div class="bg-gray-100 p-3 mt-2 rounded">
+                    <div class="flex justify-between">
+                        <span class="font-medium">${e}</span>
+                        <span class="text-blue-600 font-bold">${horas}h</span>
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">
+                        Data: ${dataEvento}
+                    </div>
+                </div>
+            `;
         });
 
         eventsDiv.innerHTML = html;
