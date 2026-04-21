@@ -111,21 +111,28 @@ document.getElementById('searchButton').onclick = async () => {
             `;
         }
 
-        let html = "<h3 class='mt-4'>Eventos:</h3>";
-
+        // 🔥 NOVO: usar eventInfo
         const eventInfo = data.eventInfo;
 
+        let html = "<h3 class='mt-4'>Eventos:</h3>";
+
         data.student.events.forEach(e => {
-        
+
             const info = eventInfo[e] || {};
-            const horas = info.horas || 0;
-            const dataEvento = info.data || "Sem data";
-        
+            const horasEvento = info.horas || 0;
+
+            let dataEvento = info.data || "Sem data";
+
+            // formata data se possível
+            try {
+                dataEvento = new Date(dataEvento).toLocaleDateString('pt-BR');
+            } catch {}
+
             html += `
                 <div class="bg-gray-100 p-3 mt-2 rounded">
                     <div class="flex justify-between">
                         <span class="font-medium">${e}</span>
-                        <span class="text-blue-600 font-bold">${horas}h</span>
+                        <span class="text-blue-600 font-bold">${horasEvento}h</span>
                     </div>
                     <div class="text-sm text-gray-600 mt-1">
                         Data: ${dataEvento}
