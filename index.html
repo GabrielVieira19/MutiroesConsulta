@@ -202,9 +202,15 @@ document.getElementById('btnValidar').addEventListener('click', async () => {
 
     try {
         const response = await fetch(URL, {
-            method: "POST",
-            body: JSON.stringify({ ra, hours: horas })
-        });
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            ra: ra,
+            hours: Number(horas)
+        })
+    });
 
         const data = await response.json();
 
