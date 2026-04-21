@@ -95,43 +95,67 @@ document.getElementById('searchButton').onclick = async () => {
         return;
     }
 
-    const response = await fetch(`${URL}?ra=${ra}`);
-    const data = await response.json();
+    // 🔄 LOADING
+    resultDiv.innerHTML = '<p class="text-blue-600">Obtendo dados...</p>';
+    eventsDiv.innerHTML = '';
 
-    if (data.erro) {
-        resultDiv.innerHTML = `<p class="text-red-600">${data.erro}</p>`;
-        return;
-    }
+    try {
 
-    const student = data.student;
-    const eventHours = data.eventHours;
+        const response = await fetch(`${URL}?ra=${ra}`);
+        const data = await response.json();
 
-    resultDiv.innerHTML = `
-        <p class="text-2xl font-bold text-green-600">
-            ${student.hours} horas acumuladas
-        </p>
-    `;
+        if (data.erro) {
+            resultDiv.innerHTML = `<p class="text-red-600">${data.erro}</p>`;
+            return;
+        }
 
-    if (student.status && student.status !== "Sem solicitação") {
-        resultDiv.innerHTML += `
-            <p class="text-red-600 mt-2">
-                ${student.requestedHours}h - ${student.status}
+        const student = data.student;
+        const eventHours = data.eventHours;
+
+        let horasTotais = Number(student.hours) || 0;
+        let horasValidadas = Number(student.requestedHours) || 0;
+        let status = student.status;
+
+        // 🔥 DESCONTO SE VALIDADO
+        if (status === "Realizada") {
+            horasTotais -= horasValidadas;
+        }
+
+        // 🎯 HORAS
+        resultDiv.innerHTML = `
+            <p class="text-2xl font-bold text-green-600">
+                ${horasTotais} horas acumuladas
             </p>
         `;
-    }
 
-    let html = `<h3 class="mt-4 font-semibold">Eventos:</h3>`;
+        // 🔴 HORAS VALIDADAS
+        if (status && status !== "Sem solicitação") {
+            resultDiv.innerHTML += `
+                <p class="text-2xl font-bold text-red-600 mt-2">
+                    Horas Validadas: ${horasValidadas}h | ${status}
+                </p>
+            `;
+        }
 
-    student.events.forEach(e => {
-        html += `<div class="flex justify-between bg-gray-100 p-2 rounded mt-2">
+        // EVENTOS
+        let html = `<h3 class="mt-4 font-semibold">Eventos:</h3>`;
+
+        student.events.forEach(e => {
+            html += `
+                <div class="flex justify-between bg-gray-100 p-2 rounded mt-2">
                     <span>${e}</span>
                     <span>${eventHours[e] || 0}h</span>
-                 </div>`;
-    });
+                </div>
+            `;
+        });
 
-    eventsDiv.innerHTML = html;
+        eventsDiv.innerHTML = html;
+
+    } catch (error) {
+        console.error(error);
+        resultDiv.innerHTML = '<p class="text-red-600">Erro ao buscar dados.</p>';
+    }
 };
-
 // VALIDAÇÃO (SEM CORS PROBLEMA)
 document.getElementById('btnValidar').onclick = async () => {
 
