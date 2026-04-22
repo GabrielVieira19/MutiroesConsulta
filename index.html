@@ -188,7 +188,7 @@ msgValidacao.innerHTML = "<p class='text-red-600'>Horas devem ser maiores que ze
 return;
 }
 
-msgValidacao.innerHTML = "<p class='text-blue-600'>Enviando...</p>";
+msgValidacao.innerHTML = "<p class='text-blue-600'>Verificando dados...</p>";
 
 const res = await fetch(URL, {
 method: "POST",
@@ -198,6 +198,7 @@ ra,
 hours: horas
 })
 });
+
 
 const text = await res.text();
 console.log("Resposta do servidor:", text);
@@ -210,6 +211,8 @@ try {
     msgValidacao.innerHTML = "<p class='text-red-600'>Erro inesperado do servidor</p>";
     return;
 }
+  
+msgValidacao.innerHTML = "<p class='text-blue-600'>Enviando token...</p>";
 
 if (data.sucesso) {
 
