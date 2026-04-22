@@ -109,11 +109,11 @@ ${disponiveis} horas disponíveis
 `;
 
 if (validadas > 0) {
-result.innerHTML += `<p class="text-green-600">Validadas: ${validadas}h</p>`;
+result.innerHTML += `<p class="text-green-600 text-lg font-bold">Validadas: ${validadas}h</p>`;
 }
 
 if (solicitadas > 0) {
-result.innerHTML += `<p class="text-yellow-500">Solicitadas: ${solicitadas}h (${status})</p>`;
+result.innerHTML += `<p class="text-yellow-500 text-lg font-bold">Solicitadas: ${solicitadas}h (${status})</p>`;
 }
 
 // EVENTOS CORRIGIDO
@@ -126,8 +126,8 @@ const info = data.eventInfo[e];
 html += `
 <div class="bg-gray-100 p-2 mt-2 rounded">
 <div class="flex justify-between">
-<span>${e}</span>
-<span>${info?.horas || 0}h</span>
+<span class="text-blue-600 font-bold">${e}</span>
+<span class="text-blue-600 font-bold">${info?.horas || 0}h</span>
 </div>
 <div class="text-sm text-gray-500">
 ${info?.data || "Sem data"}
