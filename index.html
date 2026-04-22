@@ -26,7 +26,6 @@ style="background-image: url('logo.png');">
   border-radius: 8px;
   background: #6b7280;
   color: white;
-  transition: 0.3s;
 }
 .tab.active {
   background: #3b82f6;
@@ -86,6 +85,8 @@ const ra = raInput.value.trim();
 result.innerHTML = "<p class='text-blue-600'>Obtendo dados...</p>";
 eventsList.innerHTML = "";
 
+try {
+
 const res = await fetch(`${URL}?ra=${ra}`);
 const data = await res.json();
 
@@ -101,64 +102,68 @@ let status = data.student.status;
 
 let disponiveis = total - validadas;
 
-// principal
 result.innerHTML = `
 <p class="text-2xl text-green-600 font-bold">
 ${disponiveis} horas disponíveis
 </p>
 `;
 
-// validadas
 if (validadas > 0) {
-result.innerHTML += `
-<p class="text-green-600 text-lg">
-Validadas: ${validadas}h
-</p>`;
+result.innerHTML += `<p class="text-green-600">Validadas: ${validadas}h</p>`;
 }
 
-// pendente
 if (solicitadas > 0) {
-result.innerHTML += `
-<p class="text-yellow-500 text-lg">
-Solicitadas: ${solicitadas}h (${status})
-</p>`;
+result.innerHTML += `<p class="text-yellow-500">Solicitadas: ${solicitadas}h (${status})</p>`;
 }
 
-// eventos
+// EVENTOS CORRIGIDO
 let html = "<h3 class='mt-4 font-bold'>Eventos</h3>";
 
 data.student.events.forEach(e => {
-let info = data.eventInfo[e];
+
+const info = data.eventInfo[e];
 
 html += `
 <div class="bg-gray-100 p-2 mt-2 rounded">
 <div class="flex justify-between">
 <span>${e}</span>
-<span>${info.horas}h</span>
+<span>${info?.horas || 0}h</span>
 </div>
-<div class="text-sm text-gray-500">${info.data}</div>
+<div class="text-sm text-gray-500">
+${info?.data || "Sem data"}
+</div>
 </div>
 `;
+
 });
 
 eventsList.innerHTML = html;
+
+} catch {
+result.innerHTML = "<p class='text-red-600'>Erro ao buscar</p>";
+}
 
 };
 
 // VALIDAÇÃO
 btnValidar.onclick = async () => {
 
+const ra = raValidacao.value.trim();
+const horas = Number(horasValidacao.value);
+
+if (!ra || !horas || horas <= 0) {
+msgValidacao.innerHTML = "<p class='text-red-600'>Horas devem ser maiores que zero</p>";
+return;
+}
+
 msgValidacao.innerHTML = "<p class='text-blue-600'>Enviando...</p>";
 
-const response = await fetch(URL, {
+const res = await fetch(URL, {
 method: "POST",
-body: new URLSearchParams({
-ra: raValidacao.value,
-hours: horasValidacao.value
-})
+body: new URLSearchParams({ ra, hours: horas })
 });
 
-const data = await response.json();
+const data = await res.json();
 
 if (data.sucesso) {
 msgValidacao.innerHTML = "<p class='text-green-600'>Solicitação enviada!</p>";
@@ -168,8 +173,8 @@ msgValidacao.innerHTML = `<p class='text-red-600'>${data.erro}</p>`;
 
 };
 
-// ABAS + INDICADOR VISUAL
-function ativarAba(aba) {
+// ABAS
+function ativar(aba) {
 
 abaConsulta.classList.add('hidden');
 abaInfo.classList.add('hidden');
@@ -179,25 +184,24 @@ btnConsulta.classList.remove('active');
 btnInfo.classList.remove('active');
 btnValidacao.classList.remove('active');
 
-if (aba === "consulta") {
+if (aba === 1) {
 abaConsulta.classList.remove('hidden');
 btnConsulta.classList.add('active');
 }
-
-if (aba === "info") {
+if (aba === 2) {
 abaInfo.classList.remove('hidden');
 btnInfo.classList.add('active');
 }
-
-if (aba === "validacao") {
+if (aba === 3) {
 abaValidacao.classList.remove('hidden');
 btnValidacao.classList.add('active');
 }
+
 }
 
-btnConsulta.onclick = () => ativarAba("consulta");
-btnInfo.onclick = () => ativarAba("info");
-btnValidacao.onclick = () => ativarAba("validacao");
+btnConsulta.onclick = () => ativar(1);
+btnInfo.onclick = () => ativar(2);
+btnValidacao.onclick = () => ativar(3);
 
 </script>
 
