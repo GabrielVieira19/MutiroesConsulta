@@ -60,8 +60,6 @@ Validar
 
 <script>
 
-const URL = "https://script.google.com/macros/s/AKfycbw5c_x10xh_jFN_WU35r7Ha1yxC3HhXqrFXItG3uepytXqkQJRD1yNpBHPXWpUfQn0T/exec";
-
 // CONSULTA
 document.getElementById('searchButton').onclick = async () => {
 
@@ -91,15 +89,22 @@ let horas = Number(data.student.hours) || 0;
 let validadas = Number(data.student.requestedHours) || 0;
 let status = data.student.status;
 
-if (status === "Realizada") {
+// desconto se validado
+if (status === "Validado") {
 horas -= validadas;
 }
 
 resultDiv.innerHTML = `<p class="text-2xl text-green-600">${horas} horas acumuladas</p>`;
 
+// 🎨 COR DINÂMICA
+let corStatus = "text-red-600";
+
+if (status === "Pendente") corStatus = "text-yellow-500";
+if (status === "Validado") corStatus = "text-green-600";
+
 if (status && status !== "Sem solicitação") {
 resultDiv.innerHTML += `
-<p class="text-2xl text-red-600">
+<p class="text-lg ${corStatus} mt-2">
 Horas Validadas: ${validadas}h | ${status}
 </p>`;
 }
@@ -118,9 +123,7 @@ let dataEvento = info.data;
 
 if (dataEvento) {
 const d = new Date(dataEvento);
-if (!isNaN(d)) {
-dataEvento = d.toLocaleDateString('pt-BR');
-}
+if (!isNaN(d)) dataEvento = d.toLocaleDateString('pt-BR');
 } else {
 dataEvento = "Sem data";
 }
@@ -156,9 +159,8 @@ msg.innerHTML = "<p class='text-red-600'>Preencha tudo</p>";
 return;
 }
 
-msg.innerHTML = "<p class='text-blue-600'>Verificando horas...</p>";
+msg.innerHTML = "<p class='text-blue-600'>Verificando...</p>";
 
-// 🔍 verifica horas antes
 const res = await fetch(`${URL}?ra=${ra}`);
 const data = await res.json();
 
@@ -167,25 +169,32 @@ msg.innerHTML = "<p class='text-red-600'>RA não encontrado</p>";
 return;
 }
 
-let total = Number(data.student.hours) || 0;
-let usadas = Number(data.student.requestedHours) || 0;
-
-if (data.student.status === "Realizada") {
-total -= usadas;
-}
-
-// 🚨 bloqueio
-if (horas > total) {
+// 🚨 BLOQUEIO FRONT
+if (data.student.status === "Pendente") {
 msg.innerHTML = `
 <p class='text-red-600'>
-Horas insuficientes para validação.<br>
-Consulte suas horas acumuladas.
+Já possui um pedido de validação em aberto.<br>
+Tente novamente mais tarde ou entre em contato.
 </p>`;
 return;
 }
 
-// envio
-msg.innerHTML = "<p class='text-blue-600'>Enviando solicitação...</p>";
+let total = Number(data.student.hours) || 0;
+let usadas = Number(data.student.requestedHours) || 0;
+
+if (data.student.status === "Validado") {
+total -= usadas;
+}
+
+if (horas > total) {
+msg.innerHTML = `
+<p class='text-red-600'>
+Horas insuficientes para validação.
+</p>`;
+return;
+}
+
+msg.innerHTML = "<p class='text-blue-600'>Enviando...</p>";
 
 try {
 
@@ -194,8 +203,7 @@ method: "POST",
 body: new URLSearchParams({ ra, hours: horas })
 });
 
-const text = await response.text();
-const result = JSON.parse(text);
+const result = await response.json();
 
 if (result.sucesso) {
 msg.innerHTML = "<p class='text-green-600'>Solicitação enviada!</p>";
@@ -208,27 +216,6 @@ msg.innerHTML = "<p class='text-red-600'>Erro de conexão</p>";
 }
 };
 
-
-// ABAS
-btnConsulta.onclick = () => {
-abaConsulta.classList.remove('hidden');
-abaInfo.classList.add('hidden');
-abaValidacao.classList.add('hidden');
-};
-
-btnInfo.onclick = () => {
-abaConsulta.classList.add('hidden');
-abaInfo.classList.remove('hidden');
-abaValidacao.classList.add('hidden');
-};
-
-btnValidacao.onclick = () => {
-abaConsulta.classList.add('hidden');
-abaInfo.classList.add('hidden');
-abaValidacao.classList.remove('hidden');
-};
-
 </script>
-
 </body>
 </html>
