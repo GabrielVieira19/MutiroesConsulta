@@ -60,8 +60,13 @@ Validar
 
 <script>
 
+const URL = "SEU_URL_AQUI";
+
 // CONSULTA
 document.getElementById('searchButton').onclick = async () => {
+
+const btn = document.getElementById('searchButton');
+btn.disabled = true;
 
 const ra = document.getElementById('raInput').value.trim();
 const resultDiv = document.getElementById('result');
@@ -69,11 +74,11 @@ const eventsDiv = document.getElementById('eventsList');
 
 if (!ra) {
 resultDiv.innerHTML = "<p class='text-red-600'>Digite um RA válido</p>";
+btn.disabled = false;
 return;
 }
 
 resultDiv.innerHTML = "<p class='text-blue-600'>Obtendo dados...</p>";
-eventsDiv.innerHTML = "";
 
 try {
 
@@ -82,6 +87,7 @@ const data = await res.json();
 
 if (data.erro) {
 resultDiv.innerHTML = `<p class='text-red-600'>${data.erro}</p>`;
+btn.disabled = false;
 return;
 }
 
@@ -89,27 +95,25 @@ let horas = Number(data.student.hours) || 0;
 let validadas = Number(data.student.requestedHours) || 0;
 let status = data.student.status;
 
-// desconto se validado
 if (status === "Validado") {
 horas -= validadas;
 }
 
 resultDiv.innerHTML = `<p class="text-2xl text-green-600">${horas} horas acumuladas</p>`;
 
-// 🎨 COR DINÂMICA
-let corStatus = "text-red-600";
-
-if (status === "Pendente") corStatus = "text-yellow-500";
-if (status === "Validado") corStatus = "text-green-600";
+// status
+let cor = "text-red-600";
+if (status === "Pendente") cor = "text-yellow-500";
+if (status === "Validado") cor = "text-green-600";
 
 if (status && status !== "Sem solicitação") {
 resultDiv.innerHTML += `
-<p class="text-lg ${corStatus} mt-2">
+<p class="text-lg ${cor}">
 Horas Validadas: ${validadas}h | ${status}
 </p>`;
 }
 
-// EVENTOS
+// eventos
 const eventInfo = data.eventInfo;
 
 let html = "<h3 class='mt-4'>Eventos:</h3>";
@@ -117,38 +121,31 @@ let html = "<h3 class='mt-4'>Eventos:</h3>";
 data.student.events.forEach(e => {
 
 const info = eventInfo[e] || {};
-const horasEvento = info.horas || 0;
-
-let dataEvento = info.data;
-
-if (dataEvento) {
-const d = new Date(dataEvento);
-if (!isNaN(d)) dataEvento = d.toLocaleDateString('pt-BR');
-} else {
-dataEvento = "Sem data";
-}
 
 html += `
-<div class="bg-gray-100 p-3 mt-2 rounded">
-<div class="flex justify-between">
+<div class="bg-gray-100 p-2 mt-2">
 <span>${e}</span>
-<span class="text-blue-600 font-bold">${horasEvento}h</span>
-</div>
-<div class="text-sm text-gray-600">Data: ${dataEvento}</div>
-</div>
-`;
+<span class="float-right text-blue-600">${info.horas || 0}h</span>
+<br>
+<span class="text-sm text-gray-500">${info.data}</span>
+</div>`;
 });
 
 eventsDiv.innerHTML = html;
 
 } catch {
-resultDiv.innerHTML = "<p class='text-red-600'>Erro ao buscar dados</p>";
+resultDiv.innerHTML = "<p class='text-red-600'>Erro</p>";
 }
+
+setTimeout(() => btn.disabled = false, 2000);
 };
 
 
 // VALIDAÇÃO
 document.getElementById('btnValidar').onclick = async () => {
+
+const btn = document.getElementById('btnValidar');
+btn.disabled = true;
 
 const ra = document.getElementById('raValidacao').value;
 const horas = Number(document.getElementById('horasValidacao').value);
@@ -156,6 +153,7 @@ const msg = document.getElementById('msgValidacao');
 
 if (!ra || !horas) {
 msg.innerHTML = "<p class='text-red-600'>Preencha tudo</p>";
+btn.disabled = false;
 return;
 }
 
@@ -164,33 +162,20 @@ msg.innerHTML = "<p class='text-blue-600'>Verificando...</p>";
 const res = await fetch(`${URL}?ra=${ra}`);
 const data = await res.json();
 
-if (data.erro) {
-msg.innerHTML = "<p class='text-red-600'>RA não encontrado</p>";
-return;
-}
-
-// 🚨 BLOQUEIO FRONT
 if (data.student.status === "Pendente") {
-msg.innerHTML = `
-<p class='text-red-600'>
-Já possui um pedido de validação em aberto.<br>
-Tente novamente mais tarde ou entre em contato.
-</p>`;
+msg.innerHTML = "<p class='text-red-600'>Já possui solicitação em aberto</p>";
+btn.disabled = false;
 return;
 }
 
 let total = Number(data.student.hours) || 0;
 let usadas = Number(data.student.requestedHours) || 0;
 
-if (data.student.status === "Validado") {
-total -= usadas;
-}
+if (data.student.status === "Validado") total -= usadas;
 
 if (horas > total) {
-msg.innerHTML = `
-<p class='text-red-600'>
-Horas insuficientes para validação.
-</p>`;
+msg.innerHTML = "<p class='text-red-600'>Horas insuficientes</p>";
+btn.disabled = false;
 return;
 }
 
@@ -206,14 +191,16 @@ body: new URLSearchParams({ ra, hours: horas })
 const result = await response.json();
 
 if (result.sucesso) {
-msg.innerHTML = "<p class='text-green-600'>Solicitação enviada!</p>";
+msg.innerHTML = "<p class='text-green-600'>Enviado!</p>";
 } else {
 msg.innerHTML = `<p class='text-red-600'>${result.erro}</p>`;
 }
 
 } catch {
-msg.innerHTML = "<p class='text-red-600'>Erro de conexão</p>";
+msg.innerHTML = "<p class='text-red-600'>Erro conexão</p>";
 }
+
+setTimeout(() => btn.disabled = false, 2000);
 };
 
 </script>
