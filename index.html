@@ -6,12 +6,12 @@
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="min-h-screen flex items-center justify-center p-6 bg-center bg-cover"
+<body class="flex items-start justify-center p-6 min-h-screen bg-fixed bg-cover bg-center"
 style="background-image: url('logo.png');">
 
-<div class="absolute inset-0 bg-black/40"></div>
+<div class="fixed inset-0 bg-black/40 -z-10"></div>
 
-<div class="relative bg-white/95 rounded-2xl shadow-xl p-6 w-full max-w-xl">
+<div class="relative bg-white/95 rounded-2xl shadow-xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto">
 
 <!-- MENU -->
 <div class="flex gap-2 mb-4">
@@ -187,8 +187,13 @@ const ra = raValidacao.value.trim();
 const horas = Number(horasValidacao.value);
 const email = emailValidacao.value.trim();
 
-if (!ra || !horas || horas <= 0 || !email) {
-msgValidacao.innerHTML = "<p class='text-red-600'>Preencha todos os campos corretamente</p>";
+if (!ra || !email) {
+msgValidacao.innerHTML = "<p class='text-red-600'>Preencha RA e email</p>";
+return;
+}
+
+if (!horas || horas <= 0) {
+msgValidacao.innerHTML = "<p class='text-red-600'>As horas devem ser maiores que 0</p>";
 return;
 }
 
@@ -229,14 +234,14 @@ if (data.sucesso) {
 
 msgValidacao.innerHTML = `
 <p class="text-green-600 font-semibold">
-📧 Um código foi enviado para:<br><b>${data.email}</b>
+📧 Um código foi enviado para o email informado
 </p>
 
 <p class="text-gray-600 mt-2">
-Digite o código recebido no email para confirmar a solicitação.
+Digite o código recebido para confirmar a solicitação.
 </p>
 
-<p class="text-yellow-500 mt-2 text-sm">
+<p class="text-yellow-500 font-semibold mt-2 mb-3 text-sm">
 ⚠️ O código expira em 5 minutos
 </p>
 `;
