@@ -79,6 +79,9 @@ class="w-full p-3 border rounded mb-2">
 <input id="horasValidacao" type="number" placeholder="Horas"
 class="w-full p-3 border rounded mb-2">
 
+<input id="emailValidacao" placeholder="Confirme seu email"
+class="w-full p-3 border rounded mb-2">
+
 <button id="btnValidar"
 class="w-full bg-green-500 text-white p-3 rounded">
 Solicitar validação 
@@ -182,16 +185,36 @@ btnValidar.onclick = async () => {
 
 const ra = raValidacao.value.trim();
 const horas = Number(horasValidacao.value);
+const email = emailValidacao.value.trim();
 
-if (!ra || !horas || horas <= 0) {
-msgValidacao.innerHTML = "<p class='text-red-600'>Horas devem ser maiores que zero</p>";
+if (!ra || !horas || horas <= 0 || !email) {
+msgValidacao.innerHTML = "<p class='text-red-600'>Preencha todos os campos corretamente</p>";
 return;
 }
 
-msgValidacao.innerHTML = "<p class='text-blue-600'>Enviando...</p>";
-msgValidacao.innerHTML = "<p class='text-blue-600'>Verificando dados...</p>";
+// ETAPA 1: validar email
+msgValidacao.innerHTML = "<p class='text-blue-600'>Verificando email...</p>";
 
-const res = await fetch(URL, {
+let res = await fetch(URL, {
+method: "POST",
+body: new URLSearchParams({
+action: "verificarEmail",
+ra,
+email
+})
+});
+
+let data = await res.json();
+
+if (!data.sucesso) {
+msgValidacao.innerHTML = `<p class='text-red-600'>${data.erro}</p>`;
+return;
+}
+
+// ETAPA 2: solicitar token
+msgValidacao.innerHTML = "<p class='text-blue-600'>Enviando código...</p>";
+
+res = await fetch(URL, {
 method: "POST",
 body: new URLSearchParams({
 action: "solicitar",
@@ -200,29 +223,21 @@ hours: horas
 })
 });
 
-
-const text = await res.text();
-console.log("Resposta do servidor:", text);
-
-let data;
-
-try {
-    data = JSON.parse(text);
-} catch {
-    msgValidacao.innerHTML = "<p class='text-red-600'>Erro inesperado do servidor</p>";
-    return;
-}
-  
-msgValidacao.innerHTML = "<p class='text-blue-600'>Enviando token...</p>";
+data = await res.json();
 
 if (data.sucesso) {
 
 msgValidacao.innerHTML = `
-<p class="text-gray-600 mt-2">
-Digite o código recebido abaixo para confirmar a solicitação.
+<p class="text-green-600 font-semibold">
+📧 Um código foi enviado para:<br><b>${data.email}</b>
 </p>
-<p class="text-yellow-500 mt-1 text-sm">
-⚠️ O token expira em 5 minutos
+
+<p class="text-gray-600 mt-2">
+Digite o código recebido no email para confirmar a solicitação.
+</p>
+
+<p class="text-yellow-500 mt-2 text-sm">
+⚠️ O código expira em 5 minutos
 </p>
 `;
 
